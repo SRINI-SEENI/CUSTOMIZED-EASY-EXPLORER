@@ -1,0 +1,11 @@
+# Dependencies
+node_modules/
+
+# IDE & Editor settings
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini

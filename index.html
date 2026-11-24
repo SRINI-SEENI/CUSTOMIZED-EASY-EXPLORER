@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customized Easy Explorer</title>
+
+  <!-- Google Fonts: Montserrat (Headings) & Inter (Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+
+  <!-- Core Customized Easy Explorer Styles -->
+  <link rel="stylesheet" href="css/styles.css" />
+
+  <!-- Leaflet Interactive Map Engine (High-Performance Local Offline First) -->
+  <link rel="stylesheet" href="css/leaflet.css" />
+  <script src="js/leaflet.js"></script>
+
+  <!-- Tailwind CSS Engine -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    if (typeof tailwind !== 'undefined') {
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'surface': '#f6fafe',
+              'surface-container': '#eaeef2',
+              'surface-container-low': '#f0f4f8',
+              'surface-container-high': '#e4e9ed',
+              'primary-dark': '#0a192f',
+              'primary-container': '#0d1c32',
+              'deep-ocean': '#003580',
+              'tertiary-fixed': '#5ffbd6',
+              'tertiary-fixed-dim': '#38debb',
+              'tertiary-container': '#002019',
+              'solar-highlight': '#FFD700',
+              'glass-surface': 'rgba(255, 255, 255, 0.7)',
+              'glass-border': 'rgba(255, 255, 255, 0.45)'
+            },
+            fontFamily: {
+              headline: ['Montserrat', 'sans-serif'],
+              body: ['Inter', 'sans-serif']
+            }
+          }
+        }
+      };
+    }
+  </script>
+</head>
+
+<body
+  class="bg-[#f6fafe] text-[#171c1f] font-body min-h-screen relative overflow-x-hidden selection:bg-[#5ffbd6] selection:text-[#002019]">
+
+  <!-- Background Ambient Glow & Cinematic Travel Mesh -->
+  <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+    <div
+      class="absolute -top-40 -left-40 w-[600px] h-[600px] bg-gradient-to-br from-cyan-300/15 via-blue-500/10 to-transparent rounded-full blur-[120px]">
+    </div>
+    <div
+      class="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-gradient-to-tl from-teal-300/15 via-blue-400/10 to-transparent rounded-full blur-[120px]">
+    </div>
+    <div
+      class="absolute inset-0 bg-[radial-gradient(#003580_0.75px,transparent_0.75px)] [background-size:32px_32px] opacity-[0.035]">
+    </div>
+  </div>
+
+  <!-- Top Navigation App Bar -->
+  <header
+    class="fixed top-0 w-full z-40 bg-white/70 backdrop-blur-2xl border-b border-white/50 shadow-sm transition-all duration-300">
+    <div class="flex justify-between items-center px-4 md:px-8 h-20 w-full max-w-7xl mx-auto">
+
+      <!-- Brand & Title -->
+      <div class="flex items-center gap-3.5 cursor-pointer" onclick="window.appRouter('welcome')">
+        <div
+          class="w-11 h-11 rounded-xl bg-slate-900 text-[#5ffbd6] border border-cyan-400/40 shadow-lg flex items-center justify-center">
+          <span class="material-symbols-outlined text-2xl font-bold">explore</span>
+        </div>
+        <div>
+          <span
+            class="font-headline text-lg md:text-xl font-extrabold tracking-tight text-slate-950 block leading-tight">
+            Customized Easy Explorer
+          </span>
+          <span class="text-[10px] font-bold text-teal-700 uppercase tracking-widest block">
+            Travel & Local Services
+          </span>
+        </div>
+      </div>
+
+      <!-- Center Search & Location Anchor Display -->
+      <div class="hidden md:flex items-center gap-3">
+        <div
+          class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100/90 border border-slate-200/80 text-xs font-semibold text-slate-700 cursor-pointer hover:bg-slate-200 transition-colors"
+          onclick="window.openLocationSelectorFor('hotels')">
+          <span class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>
+          <span id="header-active-location">📍 Gandhipuram</span>
+          <span class="text-[10px] text-teal-800 font-bold bg-white px-2 py-0.5 rounded-full shadow-xs">Active</span>
+        </div>
+      </div>
+
+      <!-- Right Action Icons & User Avatar -->
+      <div class="flex items-center gap-3 sm:gap-4">
+
+        <!-- Notifications button -->
+        <button onclick="alert('Notification Terminal: Gandhipuram regional fleet is online (42 vehicles standby).')"
+          class="w-10 h-10 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors relative"
+          title="Notifications">
+          <span class="material-symbols-outlined text-2xl">notifications</span>
+          <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-teal-500 border border-white"></span>
+        </button>
+
+        <!-- Admin Quick Switcher Toggle -->
+        <button onclick="window.toggleUserRoleAction()"
+          class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-900 text-xs font-bold transition-all shadow-xs"
+          title="Switch User / Admin Role">
+          <span class="material-symbols-outlined text-sm">admin_panel_settings</span>
+          <span>Admin</span>
+        </button>
+
+        <!-- User Profile & Authentication Slot -->
+        <div id="header-user-slot" class="relative">
+          <div onclick="window.toggleUserMenu(event)"
+            class="flex items-center gap-2.5 p-1 sm:pr-3 rounded-full hover:bg-slate-100 cursor-pointer transition-colors border border-transparent hover:border-slate-200">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"
+              alt="Explorer Elite" class="w-9 h-9 rounded-full object-cover border-2 border-teal-400 shadow-sm" />
+            <div class="hidden lg:block text-left">
+              <span class="text-xs font-bold text-slate-900 block leading-tight">Explorer Elite</span>
+              <span class="text-[10px] text-teal-700 font-semibold block">Premium Tier</span>
+            </div>
+            <span class="material-symbols-outlined text-sm text-slate-400">expand_more</span>
+          </div>
+
+          <!-- User Dropdown Menu -->
+          <div id="user-dropdown-menu"
+            class="hidden absolute right-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-200/80 p-2 z-50">
+            <div class="px-3 py-2 border-b border-slate-100 mb-1">
+              <p class="text-xs font-bold text-slate-900" id="dropdown-user-name">Explorer Elite</p>
+              <p class="text-[10px] text-slate-500 truncate" id="dropdown-user-email">djshiva257@gmail.com</p>
+            </div>
+            <a href="javascript:void(0)" onclick="window.appRouter('profile'); window.closeUserMenu()"
+              class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100">
+              <span class="material-symbols-outlined text-base text-slate-500">person</span>
+              <span>My Profile</span>
+            </a>
+            <a href="javascript:void(0)" onclick="window.appRouter('dashboard'); window.closeUserMenu()"
+              class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100">
+              <span class="material-symbols-outlined text-base text-slate-500">space_dashboard</span>
+              <span>My Bookings & Vouchers</span>
+            </a>
+            <a href="javascript:void(0)" onclick="window.appRouter('admin'); window.closeUserMenu()"
+              class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100">
+              <span class="material-symbols-outlined text-base text-purple-600">admin_panel_settings</span>
+              <span>Admin Console</span>
+            </a>
+            <div class="border-t border-slate-100 my-1"></div>
+            <a href="javascript:void(0)" onclick="window.handleSignOut(); window.closeUserMenu()"
+              class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50">
+              <span class="material-symbols-outlined text-base text-red-500">logout</span>
+              <span>Sign Out</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Left Side Navigation Bar (Desktop fixed) -->
+  <aside
+    class="hidden md:flex flex-col fixed left-0 top-0 h-screen w-64 z-30 bg-white/70 backdrop-blur-2xl border-r border-white/60 shadow-xl pt-24 pb-6 overflow-y-auto">
+
+    <!-- User Quick Card in Sidebar -->
+    <div id="sidebar-user-slot"
+      class="px-5 mb-6 flex items-center justify-between p-3 mx-3 bg-slate-50/80 rounded-2xl border border-slate-200/60">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"
+          id="sidebar-user-avatar" class="w-10 h-10 rounded-xl object-cover border border-teal-400" />
+        <div class="overflow-hidden">
+          <p class="text-xs font-bold text-slate-900 truncate" id="sidebar-user-name">Explorer Elite</p>
+          <span id="sidebar-user-badge"
+            class="text-[10px] font-semibold text-teal-800 bg-teal-100/60 px-2 py-0.5 rounded-full inline-block mt-0.5">
+            Verified Tier
+          </span>
+        </div>
+      </div>
+      <button onclick="window.handleSignOut()" title="Sign Out"
+        class="text-slate-400 hover:text-red-500 p-1 rounded-lg transition-colors">
+        <span class="material-symbols-outlined text-lg">logout</span>
+      </button>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="flex flex-col gap-1 px-3 flex-1 font-medium text-xs">
+
+      <!-- Home -->
+      <a href="javascript:void(0)" onclick="window.appRouter('welcome')" data-nav-target="welcome"
+        class="flex items-center gap-3.5 px-4 py-2.5 rounded-xl transition-all hover:bg-slate-100 text-slate-700">
+        <span class="material-symbols-outlined text-xl">home</span>
+        <span>Home</span>
+      </a>
+
+      <!-- Dashboard -->
+      <a href="javascript:void(0)" onclick="window.appRouter('dashboard')" data-nav-target="dashboard"
+        class="flex items-center gap-3.5 px-4 py-2.5 rounded-xl transition-all hover:bg-slate-100 text-slate-700">
+        <span class="material-symbols-outlined text-xl">space_dashboard</span>
+        <span>Dashboard</span>
+      </a>
+
+      <div class="my-2 border-t border-slate-200/60 px-4 pt-2">
+        <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400">Discovery Models</span>
+      </div>
+
+      <!-- Tourist Places (Model A) -->
+      <a href="javascript:void(0)" onclick="window.appRouter('tourist-places')" data-nav-target="tourist-places"
+        class="flex items-center justify-between px-4 py-2.5 rounded-xl transition-all hover:bg-slate-100 text-slate-700">
+        <div class="flex items-center gap-3.5">
+          <span class="material-symbols-outlined text-xl text-blue-600">conversion_path</span>
+          <span>Tourist Places</span>
+        </div>
+        <span class="text-[9px] font-bold bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">Route</span>
+      </a>
+
+      <!-- Hotels & Resorts (Model B) -->
+      <a href="javascript:void(0)" onclick="window.appRouter('hotels')" data-nav-target="hotels"
+        class="flex items-center justify-between px-4 py-2.5 rounded-xl transition-all hover:bg-slate-100 text-slate-700">
+        <div class="flex items-center gap-3.5">
+          <span class="material-symbols-outlined text-xl text-teal-600">hotel</span>
+          <span>Hotels & Resorts</span>
+        </div>
+        <span class="text-[9px] font-bold bg-teal-100 text-teal-800 px-1.5 py-0.5 rounded">Nearby</span>
+      </a>
+
+      <!-- Rental Vehicles (Model B) -->
+      <a href="javascript:void(0)" onclick="window.appRouter('rentals')" data-nav-target="rentals"
+        class="flex items-center justify-between px-4 py-2.5 rounded-xl transition-all hover:bg-slate-100 text-slate-700">
+        <div class="flex items-center gap-3.5">
+          <span class="material-symbols-outlined text-xl text-cyan-600">directions_car</span>
+          <span>Rental Vehicles</span>
+        </div>
+        <span class="text-[9px] font-bold bg-teal-100 text-teal-800 px-1.5 py-0.5 rounded">Nearby</span>
+      </a>
+
+      <!-- Restaurants (Model B) -->
+      <a href="javascript:void(0)" onclick="window.appRouter('restaurants')" data-nav-target="restaurants"
+        class="flex items-center justify-between px-4 py-2.5 rounded-xl transition-all hover:bg-slate-100 text-slate-700">
+        <div class="flex items-center gap-3.5">
+          <span class="material-symbols-outlined text-xl text-amber-500">restaurant</span>
+          <span>Restaurants</span>
+        </div>
+        <span class="text-[9px] font-bold bg-teal-100 text-teal-800 px-1.5 py-0.5 rounded">Nearby</span>
+      </a>
+
+      <!-- Tourist Guides (Model B) -->
+      <a href="javascript:void(0)" onclick="window.appRouter('guides')" data-nav-target="guides"
+        class="flex items-center justify-between px-4 py-2.5 rounded-xl transition-all hover:bg-slate-100 text-slate-700">
+        <div class="flex items-center gap-3.5">
+          <span class="material-symbols-outlined text-xl text-purple-600">record_voice_over</span>
+          <span>Tourist Guides</span>
+        </div>
+        <span class="text-[9px] font-bold bg-teal-100 text-teal-800 px-1.5 py-0.5 rounded">Nearby</span>
+      </a>
+
+      <!-- Hospitals & SOS (Model B) -->
+      <a href="javascript:void(0)" onclick="window.appRouter('hospitals')" data-nav-target="hospitals"
+        class="flex items-center justify-between px-4 py-2.5 rounded-xl transition-all hover:bg-slate-100 text-slate-700">
+        <div class="flex items-center gap-3.5">
+          <span class="material-symbols-outlined text-xl text-red-600">emergency</span>
+          <span>Hospitals & SOS</span>
+        </div>
+        <span class="text-[9px] font-bold bg-red-100 text-red-800 px-1.5 py-0.5 rounded">24/7</span>
+      </a>
+
+      <div class="my-2 border-t border-slate-200/60 px-4 pt-2">
+        <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400">Settings</span>
+      </div>
+
+      <!-- Profile -->
+      <a href="javascript:void(0)" onclick="window.appRouter('profile')" data-nav-target="profile"
+        class="flex items-center gap-3.5 px-4 py-2.5 rounded-xl transition-all hover:bg-slate-100 text-slate-700">
+        <span class="material-symbols-outlined text-xl">manage_accounts</span>
+        <span>Profile & Calibration</span>
+      </a>
+
+      <!-- Admin -->
+      <a href="javascript:void(0)" onclick="window.appRouter('admin')" data-nav-target="admin"
+        class="flex items-center gap-3.5 px-4 py-2.5 rounded-xl transition-all hover:bg-slate-100 text-slate-700">
+        <span class="material-symbols-outlined text-xl">admin_panel_settings</span>
+        <span>Admin Console</span>
+      </a>
+
+      <!-- Sign In / Account Switcher -->
+      <a href="javascript:void(0)" onclick="window.appRouter('auth')" data-nav-target="auth"
+        class="flex items-center gap-3.5 px-4 py-2.5 rounded-xl transition-all hover:bg-teal-50 text-teal-900 border border-teal-200/50 mt-1">
+        <span class="material-symbols-outlined text-xl text-teal-600">login</span>
+        <span id="sidebar-auth-label">Sign In / Switch Account</span>
+      </a>
+    </nav>
+
+    <!-- Bottom Upgrade Card -->
+    <div class="px-3 pt-4 border-t border-slate-200/60">
+      <div
+        class="p-3.5 rounded-2xl bg-gradient-to-r from-amber-400/20 to-orange-400/20 border border-amber-300/40 text-center">
+        <p class="text-xs font-bold text-slate-900">Explorer Gold Membership</p>
+        <p class="text-[10px] text-slate-500 mt-0.5">Exclusive travel benefits & discounts</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Canvas Mount -->
+  <main class="md:ml-64 pt-20 pb-24 min-h-screen relative z-10" id="app-mount">
+    <!-- Rendered dynamically by js/app.bundle.js -->
+  </main>
+
+  <!-- Mobile Bottom Navigation Bar (Visible only on small devices) -->
+  <nav
+    class="md:hidden fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-2xl border-t border-white/60 shadow-2xl z-40 px-3 py-2 flex justify-around items-center text-[10px] font-bold text-slate-600">
+    <button onclick="window.appRouter('welcome')" class="flex flex-col items-center gap-0.5 hover:text-teal-700">
+      <span class="material-symbols-outlined text-xl">home</span>
+      <span>Home</span>
+    </button>
+    <button onclick="window.appRouter('tourist-places')" class="flex flex-col items-center gap-0.5 hover:text-blue-700">
+      <span class="material-symbols-outlined text-xl">landscape</span>
+      <span>Places</span>
+    </button>
+    <button onclick="window.appRouter('hotels')" class="flex flex-col items-center gap-0.5 hover:text-teal-700">
+      <span class="material-symbols-outlined text-xl">hotel</span>
+      <span>Stays</span>
+    </button>
+    <button onclick="window.appRouter('rentals')" class="flex flex-col items-center gap-0.5 hover:text-cyan-700">
+      <span class="material-symbols-outlined text-xl">directions_car</span>
+      <span>Rentals</span>
+    </button>
+    <button onclick="window.appRouter('dashboard')" class="flex flex-col items-center gap-0.5 hover:text-slate-950">
+      <span class="material-symbols-outlined text-xl">space_dashboard</span>
+      <span>Dashboard</span>
+    </button>
+  </nav>
+
+  <!-- Modal Mount Layer -->
+  <div id="modal-mount"></div>
+
+  <!-- Toast Notification Mount -->
+  <div id="toast-mount" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Synchronous Bundle - Works 100% on file:/// and http:// -->
+  <script src="js/app.bundle.js"></script>
+</body>
+
+</html>
